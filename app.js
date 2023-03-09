@@ -4,10 +4,17 @@ const sqlite3 = require("sqlite3");
 const path = require("path");
 const cors = require("cors");
 
+const corsObj = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+
 const databasePath = path.join(__dirname, "moviesData.db");
 
 const app = express();
-app.use(cors());
+app.use(cors(corsObj));
 app.use(express.json());
 
 let database = null;
