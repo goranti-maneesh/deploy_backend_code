@@ -1,31 +1,34 @@
 const express = require("express");
+const path = require("path");
+const { open } = require("sqlite");
+const sqlite3 = require("sqlite3");
+const cors = require("cors");
+const bp = require("body-parser");
+
+const dbPath = path.join(__dirname, "bookDatabase.db");
 const app = express();
 
-app.get("/", (request, response) => {
-  response.send("Hello World!");
-});
-const path = require("path");
-const cors = require("cors");
-
-app.use(express.json());
 app.use(
   cors({
     origin: "*",
   })
 );
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
 
-const { open } = require("sqlite");
-const sqlite3 = require("sqlite3");
+app.use(
+  cors({
+    methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"],
+  })
+);
 
-const dbPath = path.join(__dirname, "bookDatabase.db");
+app.use(bp.json());
+app.use(bp.urlencoded({ extended: true }));
 
 let db = null;
+const port = process.env.PORT || 3001;
+
+app.get("/", (request, response) => {
+  response.send("Hello World!");
+});
 
 const initializeDBAndServer = async () => {
   try {
@@ -33,9 +36,8 @@ const initializeDBAndServer = async () => {
       filename: dbPath,
       driver: sqlite3.Database,
     });
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`Server Running at http://localhost:${PORT}/`);
+    app.listen(port, () => {
+      console.log(`Server Running at http://localhost:${port}/`);
     });
   } catch (e) {
     console.log(`DB Error: ${e.message}`);
@@ -45,16 +47,7 @@ const initializeDBAndServer = async () => {
 
 initializeDBAndServer();
 
-app.get("*", function (_, res) {
-  res.sendFile(
-    path.join(__dirname, "./client/build/index.html"),
-    function (err) {
-      res.status(500).send(err);
-    }
-  );
-});
-
-app.get("/getbooks/", async (request, response) => {
+app.get("/getbooks/", cors(), async (request, response) => {
   const getBooksQuery = `
     SELECT
       *
@@ -64,7 +57,7 @@ app.get("/getbooks/", async (request, response) => {
   response.send(booksArray);
 });
 
-app.post("/addbook/", async (request, response) => {
+app.post("/addbook/", cors(), async (request, response) => {
   const bookDetails = request.body;
   console.log(bookDetails);
   const {
@@ -83,7 +76,7 @@ app.post("/addbook/", async (request, response) => {
         '${book_title}',
         '${book_author}',
         ${published},
-        '${book_description}',
+        '${book_description}'
       );`;
 
   const dbResponse = await db.run(addBookQuery);
