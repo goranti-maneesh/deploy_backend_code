@@ -1,0 +1,24 @@
+{
+  "name": "booksapi",
+  "version": "1.0.0",
+  "description": "store and retrieve books array",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server",
+    "server": "nodemon server",
+    "booklistUI" : "npm start --prefix booklistUI",
+    "pavan" : "concurrently \"npm run server\" \"npm run booklistUI\" "
+  },
+  "author": "pavan kumar",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite": "^4.1.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "nodemon": "^2.0.22"
+  }
+}
